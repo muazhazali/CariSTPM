@@ -1,9 +1,35 @@
+"use client"
+
+import { useState } from "react"
 import { Search } from "lucide-react"
 import SchoolList from "@/components/school-list"
 import FilterPanel from "@/components/filter-panel"
 import ComparisonBanner from "@/components/comparison-banner"
 
+interface Filters {
+  states: string[]
+  subjects: string[]
+  streams: string[]
+}
+
 export default function Home() {
+  const [filters, setFilters] = useState<Filters>({
+    states: [],
+    subjects: [],
+    streams: [],
+  })
+  const [shouldApplyFilters, setShouldApplyFilters] = useState(false)
+
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters)
+  }
+
+  const handleApplyFilters = () => {
+    setShouldApplyFilters(true)
+    // Reset the flag after a short delay to allow for future filter applications
+    setTimeout(() => setShouldApplyFilters(false), 100)
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 pt-16">
       {/* Hero Section */}
@@ -31,12 +57,18 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Filter Panel */}
           <div className="w-full lg:w-1/4">
-            <FilterPanel />
+            <FilterPanel 
+              onFilterChange={handleFilterChange}
+              onApplyFilters={handleApplyFilters}
+            />
           </div>
 
           {/* School List */}
           <div className="w-full lg:w-3/4">
-            <SchoolList />
+            <SchoolList 
+              filters={filters}
+              shouldApplyFilters={shouldApplyFilters}
+            />
           </div>
         </div>
       </div>

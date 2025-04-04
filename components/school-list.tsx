@@ -1,13 +1,22 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { School, fetchSchools, PaginatedResponse } from '@/lib/supabase'
+import { School, fetchSchools, fetchSchoolsWithFilters, PaginatedResponse } from '@/lib/supabase'
 import { useInView } from 'react-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from "@/components/ui/button"
 
-export default function SchoolList() {
+interface SchoolListProps {
+  filters?: {
+    states: string[]
+    subjects: string[]
+    streams: string[]
+  }
+  shouldApplyFilters?: boolean
+}
+
+export default function SchoolList({ filters, shouldApplyFilters = false }: SchoolListProps) {
   const [schools, setSchools] = useState<School[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -21,17 +30,55 @@ export default function SchoolList() {
     rootMargin: '100px',
   })
 
+  // Reset schools when filters change and shouldApplyFilters is true
+  useEffect(() => {
+    if (shouldApplyFilters) {
+      setSchools([])
+      setPage(1)
+      setHasMore(true)
+      loadMoreSchools(true)
+    }
+  }, [filters, shouldApplyFilters])
+
   // Function to load more schools
-  const loadMoreSchools = useCallback(async () => {
+  const loadMoreSchools = useCallback(async (isFirstLoad: boolean = false) => {
     try {
       setIsLoading(true)
-      const response: PaginatedResponse<School> = await fetchSchools(page)
+      let response: PaginatedResponse<School>
+
+      const hasFilters = filters && (
+        (filters.states && filters.states.length > 0) ||
+        (filters.subjects && filters.subjects.length > 0) ||
+        (filters.streams && filters.streams.length > 0)
+      )
+
+      if (hasFilters) {
+        // Convert filters to the format expected by the API
+        const apiFilters: Partial<School> = {}
+        
+        // Handle state filters - if any states are selected, use them all
+        if (filters && filters.states && filters.states.length > 0) {
+          apiFilters.NEGERI = filters.states[0] // Supabase will match exact value
+        }
+
+        response = await fetchSchoolsWithFilters(apiFilters, isFirstLoad ? 1 : page)
+      } else {
+        response = await fetchSchools(isFirstLoad ? 1 : page)
+      }
       
-      setSchools(prevSchools => [...prevSchools, ...response.data])
+      // If we have multiple states selected, filter the results client-side
+      let filteredData = response.data
+      if (filters && filters.states && filters.states.length > 1) {
+        filteredData = response.data.filter(school => 
+          filters.states.includes(school.NEGERI)
+        )
+      }
+      
+      setSchools(prevSchools => isFirstLoad ? filteredData : [...prevSchools, ...filteredData])
       setHasMore(response.hasMore)
       setTotalCount(response.count)
       
-      if (response.hasMore) {
+      if (response.hasMore && !isFirstLoad) {
         setPage(prev => prev + 1)
       }
     } catch (err) {
@@ -40,7 +87,7 @@ export default function SchoolList() {
     } finally {
       setIsLoading(false)
     }
-  }, [page])
+  }, [page, filters])
 
   // Load more schools when scrolling to bottom
   useEffect(() => {
@@ -51,17 +98,8 @@ export default function SchoolList() {
 
   // Initial load
   useEffect(() => {
-    loadMoreSchools()
+    loadMoreSchools(true)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleTestInsert = async () => {
-    try {
-      await loadMoreSchools() // Reload the list after insert
-    } catch (err) {
-      console.error('Error inserting test school:', err)
-      setError(err instanceof Error ? err.message : 'Failed to insert test school')
-    }
-  }
 
   if (error) {
     return (
@@ -71,9 +109,7 @@ export default function SchoolList() {
         <p className="text-sm text-red-500 dark:text-red-300 mt-2">
           Please check your connection and try again. If the problem persists, contact support.
         </p>
-        <Button onClick={handleTestInsert} className="mt-4">
-          Insert Test School
-        </Button>
+        
       </div>
     )
   }
@@ -138,11 +174,7 @@ export default function SchoolList() {
         </div>
       )}
 
-      <div className="flex justify-center mt-4">
-        <Button onClick={handleTestInsert} variant="outline" size="sm">
-          Insert Test School
-        </Button>
-      </div>
+      
     </div>
   )
 }

@@ -8,20 +8,20 @@ import { X, Filter, ChevronUp, ChevronDown } from "lucide-react"
 
 // Sample data - replace with actual data from your database
 const states = [
-  "Johor",
-  "Kedah",
-  "Kelantan",
-  "Melaka",
-  "Negeri Sembilan",
-  "Pahang",
-  "Perak",
-  "Perlis",
-  "Pulau Pinang",
-  "Sabah",
-  "Sarawak",
-  "Selangor",
-  "Terengganu",
-  "Wilayah Persekutuan",
+  "JOHOR",
+  "KEDAH",
+  "KELANTAN",
+  "MELAKA",
+  "NEGERI SEMBILAN",
+  "PAHANG",
+  "PERAK",
+  "PERLIS",
+  "PULAU PINANG",
+  "SABAH",
+  "SARAWAK",
+  "SELANGOR",
+  "TERENGGANU",
+  "WILAYAH PERSEKUTUAN",
 ]
 
 const subjects = [
@@ -42,28 +42,66 @@ const subjects = [
 
 const streamTypes = ["Science", "Social Science"]
 
-export default function FilterPanel() {
+interface FilterPanelProps {
+  onFilterChange: (filters: {
+    states: string[]
+    subjects: string[]
+    streams: string[]
+  }) => void
+  onApplyFilters: () => void
+}
+
+export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPanelProps) {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [selectedStreams, setSelectedStreams] = useState<string[]>([])
   const [isCollapsed, setIsCollapsed] = useState(true)
 
   const handleStateChange = (state: string) => {
-    setSelectedStates((prev) => (prev.includes(state) ? prev.filter((s) => s !== state) : [...prev, state]))
+    const newStates = selectedStates.includes(state)
+      ? selectedStates.filter((s) => s !== state)
+      : [...selectedStates, state]
+    setSelectedStates(newStates)
+    onFilterChange({
+      states: newStates,
+      subjects: selectedSubjects,
+      streams: selectedStreams,
+    })
   }
 
   const handleSubjectChange = (subject: string) => {
-    setSelectedSubjects((prev) => (prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject]))
+    const newSubjects = selectedSubjects.includes(subject)
+      ? selectedSubjects.filter((s) => s !== subject)
+      : [...selectedSubjects, subject]
+    setSelectedSubjects(newSubjects)
+    onFilterChange({
+      states: selectedStates,
+      subjects: newSubjects,
+      streams: selectedStreams,
+    })
   }
 
   const handleStreamChange = (stream: string) => {
-    setSelectedStreams((prev) => (prev.includes(stream) ? prev.filter((s) => s !== stream) : [...prev, stream]))
+    const newStreams = selectedStreams.includes(stream)
+      ? selectedStreams.filter((s) => s !== stream)
+      : [...selectedStreams, stream]
+    setSelectedStreams(newStreams)
+    onFilterChange({
+      states: selectedStates,
+      subjects: selectedSubjects,
+      streams: newStreams,
+    })
   }
 
   const resetFilters = () => {
     setSelectedStates([])
     setSelectedSubjects([])
     setSelectedStreams([])
+    onFilterChange({
+      states: [],
+      subjects: [],
+      streams: [],
+    })
   }
 
   const toggleCollapse = () => {
@@ -235,7 +273,7 @@ export default function FilterPanel() {
           </AccordionItem>
         </Accordion>
 
-        <Button className="w-full mt-4" variant="default">
+        <Button className="w-full mt-4" variant="default" onClick={onApplyFilters}>
           Apply Filters
         </Button>
       </div>
