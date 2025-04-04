@@ -5,7 +5,7 @@ import ComparisonBanner from "@/components/comparison-banner"
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center w-full">
+    <main className="min-h-screen bg-gray-50 pt-16">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white w-full flex justify-center px-4 py-8 md:py-16">
         <div className="container max-w-6xl flex flex-col items-center text-center">
@@ -27,10 +27,10 @@ export default function Home() {
       </section>
 
       {/* Main Content */}
-      <div className="container max-w-6xl px-4 py-6 md:py-8 w-full">
-        <div className="flex flex-col lg:flex-row gap-6 justify-center">
+      <div className="container max-w-6xl px-4 py-6 md:py-8 mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Filter Panel */}
-          <div className="w-full lg:w-1/4 sticky top-4">
+          <div className="w-full lg:w-1/4">
             <FilterPanel />
           </div>
 
