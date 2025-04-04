@@ -26,7 +26,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
   // Create ref and inView for infinite scroll
   const { ref, inView } = useInView({
     threshold: 0,
-    rootMargin: '100px',
+    rootMargin: '200px',
   })
 
   // Group schools by PUSAT (school name) with all their data
@@ -107,7 +107,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-4">
         <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">Error Loading Schools</h3>
         <p className="text-red-600 dark:text-red-400">{error}</p>
         <p className="text-sm text-red-500 dark:text-red-300 mt-2">
@@ -119,14 +119,14 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Schools</h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Schools</h2>
+        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
           Showing {Object.keys(groupedSchools).length} of {totalCount} schools
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-5">
         {Object.entries(groupedSchools).map(([schoolName, schoolGroup]) => (
           <SchoolCard key={schoolName} schools={schoolGroup} />
         ))}
@@ -135,16 +135,21 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
         {isLoading && (
           <>
             {[...Array(3)].map((_, i) => (
-              <div key={`skeleton-${i}`} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 space-y-4">
-                <Skeleton className="h-6 w-3/4" />
-                <div className="h-px bg-gray-200 dark:bg-gray-700 w-full" />
+              <div key={`skeleton-${i}`} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <Skeleton className="h-6 w-2/3 mb-4" />
+                <div className="h-px bg-gray-100 dark:bg-gray-700 w-full mb-4" />
                 <div className="space-y-4">
                   <div>
-                    <Skeleton className="h-5 w-1/4 mb-2" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-5 w-1/4 mb-3" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[...Array(3)].map((_, j) => (
+                        <div key={j} className="space-y-2">
+                          <Skeleton className="h-4 w-1/2 mb-1" />
+                          <Skeleton className="h-3 w-full" />
+                          <Skeleton className="h-3 w-2/3" />
+                          <Skeleton className="h-3 w-3/4" />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -159,15 +164,17 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
 
       {/* Loading state at bottom */}
       {isLoading && (
-        <div className="text-center py-4 text-muted-foreground">
-          Loading more schools...
+        <div className="text-center py-4 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+          <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-1 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-1 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
         </div>
       )}
 
       {/* End of list message */}
-      {!hasMore && !isLoading && (
-        <div className="text-center py-4 text-muted-foreground">
-          No more schools to load
+      {!hasMore && !isLoading && schools.length > 0 && (
+        <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm font-medium">
+          You've reached the end of the list
         </div>
       )}
     </div>
