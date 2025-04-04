@@ -6,6 +6,7 @@ import { ArrowLeft, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useComparison } from "@/context/comparison-context"
 import Link from "next/link"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export default function ComparePage() {
   const router = useRouter()
@@ -92,26 +93,6 @@ export default function ComparePage() {
                 {schools.map((school) => (
                   <td key={`${school.ID}-location`} className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {school.PPD}, {school.NEGERI}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800">
-                  Streams
-                </td>
-                {schools.map((school) => (
-                  <td key={`${school.ID}-streams`} className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                    {school.BIDANG}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800">
-                  Semester
-                </td>
-                {schools.map((school) => (
-                  <td key={`${school.ID}-semester`} className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                    {school.SEMESTER}
                   </td>
                 ))}
               </tr>
