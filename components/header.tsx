@@ -11,9 +11,9 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto max-w-6xl px-4 py-4">
-        <div className="flex items-center justify-between">
+    <header className="bg-white dark:bg-gray-900 shadow-sm fixed top-0 left-0 right-0 h-16 z-50">
+      <div className="container mx-auto max-w-6xl px-4 h-full">
+        <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">CariSTPM</span>
@@ -71,7 +71,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 space-y-4">
+          <nav className="md:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 border-t dark:border-gray-800 shadow-lg py-4 px-4 space-y-4">
             <Link
               href="/"
               className="block text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
