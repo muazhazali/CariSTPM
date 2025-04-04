@@ -1,56 +1,49 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
-
-interface School {
-  id: string
-  name: string
-  state: string
-  district: string
-  streams: string[]
-  subjects: string[]
-  semester: string
-}
+import { createContext, useContext, useState } from "react"
+import { type School } from "@/lib/supabase"
 
 interface ComparisonContextType {
-  comparisonList: School[]
+  schools: School[]
   addToComparison: (school: School) => void
-  removeFromComparison: (id: string) => void
+  removeFromComparison: (schoolId: string) => void
+  isInComparison: (schoolId: string) => boolean
   clearComparison: () => void
-  isInComparison: (id: string) => boolean
 }
 
 const ComparisonContext = createContext<ComparisonContextType | undefined>(undefined)
 
-export function ComparisonProvider({ children }: { children: ReactNode }) {
-  const [comparisonList, setComparisonList] = useState<School[]>([])
+export function ComparisonProvider({ children }: { children: React.ReactNode }) {
+  const [schools, setSchools] = useState<School[]>([])
 
   const addToComparison = (school: School) => {
-    if (comparisonList.length < 4 && !comparisonList.some((s) => s.id === school.id)) {
-      setComparisonList((prev) => [...prev, school])
-    }
+    setSchools((prev) => {
+      if (prev.length >= 3) return prev
+      if (prev.some((s) => s.ID === school.ID)) return prev
+      return [...prev, school]
+    })
   }
 
-  const removeFromComparison = (id: string) => {
-    setComparisonList((prev) => prev.filter((school) => school.id !== id))
+  const removeFromComparison = (schoolId: string) => {
+    setSchools((prev) => prev.filter((school) => school.ID !== schoolId))
+  }
+
+  const isInComparison = (schoolId: string) => {
+    return schools.some((school) => school.ID === schoolId)
   }
 
   const clearComparison = () => {
-    setComparisonList([])
-  }
-
-  const isInComparison = (id: string) => {
-    return comparisonList.some((school) => school.id === id)
+    setSchools([])
   }
 
   return (
     <ComparisonContext.Provider
       value={{
-        comparisonList,
+        schools,
         addToComparison,
         removeFromComparison,
-        clearComparison,
         isInComparison,
+        clearComparison,
       }}
     >
       {children}

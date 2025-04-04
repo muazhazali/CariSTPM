@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { useComparison } from "@/context/comparison-context"
 
 export default function ComparisonBanner() {
-  const { comparisonList, removeFromComparison, clearComparison } = useComparison()
+  const { schools, removeFromComparison, clearComparison } = useComparison()
   const [isVisible, setIsVisible] = useState(true)
 
-  if (!isVisible || comparisonList.length === 0) {
+  if (!isVisible || schools.length === 0) {
     return null
   }
 
@@ -20,17 +20,17 @@ export default function ComparisonBanner() {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <span className="text-gray-700 dark:text-gray-300 font-medium mr-4">
-              {comparisonList.length} {comparisonList.length === 1 ? "school" : "schools"} selected
+              {schools.length} {schools.length === 1 ? "school" : "schools"} selected
             </span>
             <div className="hidden md:flex space-x-2">
-              {comparisonList.map((school) => (
+              {schools.map((school) => (
                 <div
                   key={school.id}
                   className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm flex items-center"
                 >
-                  {school.name}
+                  {school.pusat}
                   <button
-                    onClick={() => removeFromComparison(school.id)}
+                    onClick={() => removeFromComparison(school.id.toString())}
                     className="ml-1 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
                   >
                     <X className="h-3 w-3" />
