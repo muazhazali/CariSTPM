@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// Constants for pagination
+export const ITEMS_PER_PAGE = 20
+
 console.log('Supabase URL:', supabaseUrl)
 console.log('Initializing Supabase client...')
 
@@ -19,61 +22,119 @@ export interface School {
   PAKEJ_MATA_PELAJARAN: string
 }
 
-// Function to fetch all schools
-export async function fetchSchools() {
-  console.log('Fetching schools from public schema...')
+// Type for paginated response
+export interface PaginatedResponse<T> {
+  data: T[]
+  count: number
+  hasMore: boolean
+  nextPage: number | null
+}
+
+// Function to fetch schools with pagination
+export async function fetchSchools(page: number = 1): Promise<PaginatedResponse<School>> {
+  console.log('Fetching schools page:', page)
   try {
-    // First, let's check if we can access the database
-    const { data: schemaData, error: schemaError } = await supabase
+    // First get total count for pagination
+    const { count: totalCount } = await supabase
       .from('schools')
-      .select('ID')
-      .limit(1)
-    
-    if (schemaError) {
-      console.error('Error accessing schools table:', schemaError)
-      throw schemaError
-    }
+      .select('*', { count: 'exact', head: true })
 
-    console.log('Successfully connected to schools table')
+    // Calculate pagination values
+    const from = (page - 1) * ITEMS_PER_PAGE
+    const to = from + ITEMS_PER_PAGE - 1
 
-    // Now fetch all schools
+    // Fetch paginated data
     const { data, error } = await supabase
       .from('schools')
       .select('*')
+      .range(from, to)
+      .order('ID', { ascending: true })
     
     if (error) {
       console.error('Error fetching schools:', error)
+      console.error('Full error details:', JSON.stringify(error, null, 2))
       throw error
     }
     
-    console.log('Schools fetched successfully:', data?.length || 0, 'schools found')
-    if (data?.length === 0) {
-      console.log('Warning: No schools found in the database')
+    console.log(`Fetched ${data?.length || 0} schools for page ${page}`)
+    
+    // Calculate if there are more pages
+    const hasMore = totalCount ? from + ITEMS_PER_PAGE < totalCount : false
+    const nextPage = hasMore ? page + 1 : null
+
+    return {
+      data: data || [],
+      count: totalCount || 0,
+      hasMore,
+      nextPage
     }
-    return data
   } catch (err) {
     console.error('Exception while fetching schools:', err)
+    console.error('Full error details:', err instanceof Error ? err.stack : err)
     throw err
   }
 }
 
-// Function to fetch schools with filters
-export async function fetchSchoolsWithFilters(filters: Partial<School>) {
-  let query = supabase.from('schools').select('*')
+// Function to fetch schools with filters and pagination
+export async function fetchSchoolsWithFilters(
+  filters: Partial<School>,
+  page: number = 1
+): Promise<PaginatedResponse<School>> {
+  try {
+    // Build base query for counting
+    let countQuery = supabase
+      .from('schools')
+      .select('*', { count: 'exact', head: true })
 
-  // Add filters if they exist
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      query = query.eq(key, value)
+    // Add filters to count query
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        countQuery = countQuery.eq(key, value)
+      }
+    })
+
+    // Get total count with filters
+    const { count: totalCount } = await countQuery
+
+    // Calculate pagination values
+    const from = (page - 1) * ITEMS_PER_PAGE
+    const to = from + ITEMS_PER_PAGE - 1
+
+    // Build data query
+    let query = supabase
+      .from('schools')
+      .select('*')
+      .range(from, to)
+      .order('ID', { ascending: true })
+
+    // Add filters to data query
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        query = query.eq(key, value)
+      }
+    })
+
+    // Fetch filtered and paginated data
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching filtered schools:', error)
+      console.error('Full error details:', JSON.stringify(error, null, 2))
+      throw error
     }
-  })
 
-  const { data, error } = await query
+    // Calculate if there are more pages
+    const hasMore = totalCount ? from + ITEMS_PER_PAGE < totalCount : false
+    const nextPage = hasMore ? page + 1 : null
 
-  if (error) {
-    console.error('Error fetching schools with filters:', error)
-    throw error
+    return {
+      data: data || [],
+      count: totalCount || 0,
+      hasMore,
+      nextPage
+    }
+  } catch (err) {
+    console.error('Error in fetchSchoolsWithFilters:', err)
+    throw err
   }
-
-  return data
 } 
