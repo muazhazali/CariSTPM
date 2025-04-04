@@ -5,6 +5,7 @@ import { Search } from "lucide-react"
 import SchoolList from "@/components/school-list"
 import FilterPanel from "@/components/filter-panel"
 import ComparisonBanner from "@/components/comparison-banner"
+import { useLanguage } from '@/context/language-context'
 
 interface Filters {
   states: string[]
@@ -19,6 +20,7 @@ export default function Home() {
     streams: [],
   })
   const [shouldApplyFilters, setShouldApplyFilters] = useState(false)
+  const { language } = useLanguage()
 
   const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters)
@@ -36,10 +38,10 @@ export default function Home() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white w-full flex justify-center px-4 py-10 md:py-14">
         <div className="container max-w-5xl flex flex-col items-center text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 tracking-tight">
-            Find Your Perfect Form 6 (STPM) School
+            {language === 'en' ? 'Find Your Perfect Form 6 (STPM) School' : 'Cari Sekolah Tingkatan 6 (STPM) Terbaik Anda'}
           </h1>
           <p className="text-md sm:text-lg md:text-xl mb-8 md:mb-10 px-2 text-blue-100 max-w-3xl">
-            Compare schools, explore subjects, and get personalized guidance
+            {language === 'en' ? 'Compare schools, explore subjects, and get personalized guidance' : 'Bandingkan sekolah, terokai subjek, dan dapatkan panduan peribadi'}
           </p>
 
           {/* Search Bar */}
@@ -49,7 +51,7 @@ export default function Home() {
             </div>
             <input
               type="text"
-              placeholder="Search for schools by name..."
+              placeholder={language === 'en' ? 'Search for schools by name...' : 'Cari sekolah mengikut nama...'}
               className="w-full pl-10 pr-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 border-0 shadow-sm"
             />
           </div>

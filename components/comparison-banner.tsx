@@ -23,14 +23,14 @@ export default function ComparisonBanner() {
               {schools.length} {schools.length === 1 ? "school" : "schools"} selected
             </span>
             <div className="hidden md:flex space-x-2">
-              {schools.map((school) => (
+              {schools.map((school, index) => (
                 <div
-                  key={school.id}
+                  key={`${school.ID}-${index}`}
                   className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm flex items-center"
                 >
-                  {school.pusat}
+                  {school.PUSAT}
                   <button
-                    onClick={() => removeFromComparison(school.id.toString())}
+                    onClick={() => removeFromComparison(school.ID.toString())}
                     className="ml-1 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
                   >
                     <X className="h-3 w-3" />

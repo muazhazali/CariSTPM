@@ -6,6 +6,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ComparisonProvider } from "@/context/comparison-context"
+import { LanguageProvider } from '@/context/language-context'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,11 +26,13 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ComparisonProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <div className="flex-grow">{children}</div>
-              <Footer />
-            </div>
+            <LanguageProvider>
+              <div className="flex flex-col min-h-screen">
+                <Header />
+                <div className="flex-grow">{children}</div>
+                <Footer />
+              </div>
+            </LanguageProvider>
           </ComparisonProvider>
         </ThemeProvider>
       </body>

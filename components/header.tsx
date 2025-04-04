@@ -5,10 +5,12 @@ import Link from "next/link"
 import { Menu, X, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
+import { useLanguage } from '@/context/language-context'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { language, toggleLanguage } = useLanguage()
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm fixed top-0 left-0 right-0 h-16 z-50">
@@ -22,26 +24,34 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400">
-              Home
+              {language === 'en' ? 'Home' : 'Laman Utama'}
             </Link>
             <Link
               href="/compare"
               className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
             >
-              Compare
+              {language === 'en' ? 'Compare' : 'Bandingkan'}
             </Link>
             <Link
               href="/chatbot"
               className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
             >
-              Ask AI
+              {language === 'en' ? 'Ask AI' : 'Tanya AI'}
             </Link>
             <Link
               href="/about"
               className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
             >
-              About
+              {language === 'en' ? 'About' : 'Tentang'}
             </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              aria-label="Toggle language"
+            >
+              {language === 'en' ? 'EN' : 'MS'}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -57,8 +67,16 @@ export default function Header() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={toggleLanguage}
+              aria-label="Toggle language"
               className="mr-2"
+            >
+              {language === 'en' ? 'EN' : 'MS'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -77,28 +95,28 @@ export default function Header() {
               className="block text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={() => setIsMenuOpen(false)}
             >
-              Home
+              {language === 'en' ? 'Home' : 'Laman Utama'}
             </Link>
             <Link
               href="/compare"
               className="block text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={() => setIsMenuOpen(false)}
             >
-              Compare
+              {language === 'en' ? 'Compare' : 'Bandingkan'}
             </Link>
             <Link
               href="/chatbot"
               className="block text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={() => setIsMenuOpen(false)}
             >
-              Ask AI
+              {language === 'en' ? 'Ask AI' : 'Tanya AI'}
             </Link>
             <Link
               href="/about"
               className="block text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
               onClick={() => setIsMenuOpen(false)}
             >
-              About
+              {language === 'en' ? 'About' : 'Tentang'}
             </Link>
           </nav>
         )}

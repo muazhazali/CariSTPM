@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { X, Filter, ChevronUp, ChevronDown } from "lucide-react"
+import { useLanguage } from '@/context/language-context'
+
+interface FilterPanelProps {
+  onFilterChange: (filters: {
+    states: string[];
+    subjects: string[];
+    streams: string[];
+  }) => void;
+  onApplyFilters: () => void;
+}
 
 // Sample data - replace with actual data from your database
 const states = [
@@ -24,38 +34,33 @@ const states = [
   "WILAYAH PERSEKUTUAN",
 ]
 
-const subjects = [
-  "Bahasa Melayu",
-  "English",
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Economics",
-  "Accounting",
-  "Business Studies",
-  "History",
-  "Geography",
-  "Islamic Studies",
-  "Moral Education",
-]
-
-const streamTypes = ["Science", "Social Science"]
-
-interface FilterPanelProps {
-  onFilterChange: (filters: {
-    states: string[]
-    subjects: string[]
-    streams: string[]
-  }) => void
-  onApplyFilters: () => void
-}
-
 export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPanelProps) {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [selectedStreams, setSelectedStreams] = useState<string[]>([])
   const [isCollapsed, setIsCollapsed] = useState(true)
+  const { language } = useLanguage()
+
+  const subjects = [
+    language === 'en' ? 'Bahasa Melayu' : 'Bahasa Melayu',
+    language === 'en' ? 'English' : 'Bahasa Inggeris',
+    language === 'en' ? 'Mathematics' : 'Matematik',
+    language === 'en' ? 'Physics' : 'Fizik',
+    language === 'en' ? 'Chemistry' : 'Kimia',
+    language === 'en' ? 'Biology' : 'Biologi',
+    language === 'en' ? 'Economics' : 'Ekonomi',
+    language === 'en' ? 'Accounting' : 'Perakaunan',
+    language === 'en' ? 'Business Studies' : 'Pengajian Perniagaan',
+    language === 'en' ? 'History' : 'Sejarah',
+    language === 'en' ? 'Geography' : 'Geografi',
+    language === 'en' ? 'Islamic Studies' : 'Pengajian Islam',
+    language === 'en' ? 'Moral Education' : 'Pendidikan Moral',
+  ]
+
+  const streamTypes = [
+    language === 'en' ? 'Science' : 'Sains',
+    language === 'en' ? 'Social Science' : 'Sains Sosial',
+  ]
 
   const handleStateChange = (state: string) => {
     const newStates = selectedStates.includes(state)
@@ -122,7 +127,7 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
         >
           <div className="flex items-center">
             <Filter className="h-4 w-4 mr-2" />
-            <span>Filters</span>
+            <span>{language === 'en' ? 'Filters' : 'Penapis'}</span>
             {hasActiveFilters && (
               <span className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-0.5 rounded-full">
                 {selectedStates.length + selectedSubjects.length + selectedStreams.length}
@@ -140,7 +145,9 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
       {/* Filter Content */}
       <div className={`${isCollapsed ? 'hidden lg:block' : 'block'} p-4 max-h-[calc(100vh-4rem)] overflow-y-auto`}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white hidden lg:block">Filters</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white hidden lg:block">
+            {language === 'en' ? 'Filters' : 'Penapis'}
+          </h2>
           {hasActiveFilters && (
             <Button
               variant="ghost"
@@ -205,7 +212,9 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
         <Accordion type="multiple" defaultValue={["states", "subjects", "streams"]}>
           {/* States Filter */}
           <AccordionItem value="states">
-            <AccordionTrigger className="text-gray-900 dark:text-white">States</AccordionTrigger>
+            <AccordionTrigger className="text-gray-900 dark:text-white">
+              {language === 'en' ? 'States' : 'Negeri'}
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {states.map((state) => (
@@ -226,7 +235,9 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
 
           {/* Subjects Filter */}
           <AccordionItem value="subjects">
-            <AccordionTrigger className="text-gray-900 dark:text-white">Subjects</AccordionTrigger>
+            <AccordionTrigger className="text-gray-900 dark:text-white">
+              {language === 'en' ? 'Subjects' : 'Subjek'}
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {subjects.map((subject) => (
@@ -250,7 +261,9 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
 
           {/* Stream Types Filter */}
           <AccordionItem value="streams">
-            <AccordionTrigger className="text-gray-900 dark:text-white">Stream Types</AccordionTrigger>
+            <AccordionTrigger className="text-gray-900 dark:text-white">
+              {language === 'en' ? 'Stream Types' : 'Jenis Aliran'}
+            </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-2">
                 {streamTypes.map((stream) => (

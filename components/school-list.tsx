@@ -5,6 +5,7 @@ import { School, fetchSchools, fetchSchoolsWithFilters, PaginatedResponse } from
 import { useInView } from 'react-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
 import SchoolCard from '@/components/school-card'
+import { useLanguage } from '@/context/language-context'
 
 interface SchoolListProps {
   filters?: {
@@ -22,6 +23,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const { language } = useLanguage()
 
   // Create ref and inView for infinite scroll
   const { ref, inView } = useInView({
@@ -108,10 +110,14 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
   if (error) {
     return (
       <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-4">
-        <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">Error Loading Schools</h3>
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">
+          {language === 'en' ? 'Error Loading Schools' : 'Ralat Memuatkan Sekolah'}
+        </h3>
+        <p className="text-red-600 dark:text-red-400">
+          {error}
+        </p>
         <p className="text-sm text-red-500 dark:text-red-300 mt-2">
-          Please check your connection and try again. If the problem persists, contact support.
+          {language === 'en' ? 'Please check your connection and try again. If the problem persists, contact support.' : 'Sila periksa sambungan anda dan cuba lagi. Jika masalah berterusan, hubungi sokongan.'}
         </p>
       </div>
     )
@@ -120,9 +126,11 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Schools</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          {language === 'en' ? 'Schools' : 'Sekolah'}
+        </h2>
         <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-          Showing {Object.keys(groupedSchools).length} of {totalCount} schools
+          {language === 'en' ? `Showing ${Object.keys(groupedSchools).length} of ${totalCount} schools` : `Menunjukkan ${Object.keys(groupedSchools).length} daripada ${totalCount} sekolah`}
         </p>
       </div>
 
@@ -174,7 +182,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
       {/* End of list message */}
       {!hasMore && !isLoading && schools.length > 0 && (
         <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm font-medium">
-          You've reached the end of the list
+          {language === 'en' ? "You've reached the end of the list" : 'Anda telah mencapai penghujung senarai'}
         </div>
       )}
     </div>

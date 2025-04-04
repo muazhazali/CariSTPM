@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useComparison } from "@/context/comparison-context"
 import { School } from "@/lib/supabase"
+import { useLanguage } from '@/context/language-context'
 
 interface SchoolCardProps {
   schools: School[]
@@ -22,6 +23,7 @@ interface GroupedSubjects {
 export default function SchoolCard({ schools }: SchoolCardProps) {
   const { addToComparison, isInComparison } = useComparison()
   const isAdded = isInComparison(schools[0].ID)
+  const { language } = useLanguage()
 
   // Group subjects by semester and BIDANG, keeping each class separate
   const groupedSubjects = schools.reduce((acc, schoolData) => {
@@ -79,7 +81,7 @@ export default function SchoolCard({ schools }: SchoolCardProps) {
                     <div key={idx} className="bg-gray-50 dark:bg-gray-800/80 rounded-md p-3 border border-gray-100 dark:border-gray-700">
                       <div className="mb-2 pb-1 border-b border-gray-200 dark:border-gray-700 flex items-center">
                         <Badge variant="secondary" className="text-xs bg-blue-100/50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-none">
-                          Class {idx + 1}
+                          {language === 'en' ? `Class ${idx + 1}` : `Kelas ${idx + 1}`}
                         </Badge>
                       </div>
                       <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
@@ -103,11 +105,7 @@ export default function SchoolCard({ schools }: SchoolCardProps) {
       <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700/50 flex justify-between items-center">
         <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
           <GraduationCap className="h-4 w-4 mr-1.5 text-blue-600 dark:text-blue-400" />
-          {Object.values(groupedSubjects).reduce((total, bidangGroups) => 
-            total + Object.values(bidangGroups).reduce((sum, { combinations }) => 
-              sum + combinations.length, 0
-            ), 0
-          )} classes available
+          {language === 'en' ? `${Object.values(groupedSubjects).reduce((total, bidangGroups) => total + Object.values(bidangGroups).reduce((sum, { combinations }) => sum + combinations.length, 0), 0)} classes available` : `${Object.values(groupedSubjects).reduce((total, bidangGroups) => total + Object.values(bidangGroups).reduce((sum, { combinations }) => sum + combinations.length, 0), 0)} jumlah kelas`}
         </div>
         <Button
           variant={isAdded ? "outline" : "default"}
@@ -121,12 +119,12 @@ export default function SchoolCard({ schools }: SchoolCardProps) {
           {isAdded ? (
             <>
               <Check className="h-3.5 w-3.5 mr-1" />
-              Added
+              {language === 'en' ? 'Added' : 'Ditambah'}
             </>
           ) : (
             <>
               <Plus className="h-3.5 w-3.5 mr-1" />
-              Compare
+              {language === 'en' ? 'Compare' : 'Bandingkan'}
             </>
           )}
         </Button>

@@ -73,6 +73,51 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Cool Projects</h3>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="https://sedekahje.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  SedekahJe
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://belasungkawa.my/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  Belasungkawa
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://duaa.my/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  Duaa
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://pantunis.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  Pantunis
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400">
           <p>&copy; {new Date().getFullYear()} CariSTPM. All rights reserved.</p>
