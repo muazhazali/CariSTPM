@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Send, Bot, User, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -91,13 +91,8 @@ export default function ChatbotPage() {
     }, 1000)
   }
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
-
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-4xl px-4 py-8 mt-16">
       <div className="flex items-center mb-6">
         <Button variant="ghost" onClick={() => router.push("/")} className="mr-2">
           <ArrowLeft className="h-4 w-4 mr-1" />
