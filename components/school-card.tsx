@@ -1,108 +1,123 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
-import { MapPin, BookOpen, GraduationCap, Plus, Check } from "lucide-react"
+import { GraduationCap, Plus, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useComparison } from "@/context/comparison-context"
 import { School } from "@/lib/supabase"
 
 interface SchoolCardProps {
-  school: School
+  schools: School[]
 }
 
-export default function SchoolCard({ school }: SchoolCardProps) {
-  const { addToComparison, isInComparison } = useComparison()
-  const [isExpanded, setIsExpanded] = useState(false)
+interface GroupedSubjects {
+  [semester: string]: {
+    [bidang: string]: {
+      combinations: string[][]
+    }
+  }
+}
 
-  const isAdded = isInComparison(school.ID)
-  const subjects = school.PAKEJ_MATA_PELAJARAN.split(", ")
+export default function SchoolCard({ schools }: SchoolCardProps) {
+  const { addToComparison, isInComparison } = useComparison()
+  const isAdded = isInComparison(schools[0].ID)
+
+  // Group subjects by semester and BIDANG, keeping each class separate
+  const groupedSubjects = schools.reduce((acc, schoolData) => {
+    const semester = schoolData.SEMESTER
+    const bidang = schoolData.BIDANG
+    const subjects = schoolData.PAKEJ_MATA_PELAJARAN.split(", ")
+
+    if (!acc[semester]) {
+      acc[semester] = {}
+    }
+    if (!acc[semester][bidang]) {
+      acc[semester][bidang] = { combinations: [] }
+    }
+    
+    // Add this class if it's not already present
+    const combinationExists = acc[semester][bidang].combinations.some(
+      existing => existing.join(",") === subjects.join(",")
+    )
+    if (!combinationExists) {
+      acc[semester][bidang].combinations.push(subjects)
+    }
+
+    return acc
+  }, {} as GroupedSubjects)
 
   const handleCompare = () => {
-    addToComparison(school)
+    addToComparison(schools[0])
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-      <div className="p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-              <Link href={`/schools/${school.ID}`} className="hover:text-blue-600 dark:hover:text-blue-400">
-                {school.PUSAT}
-              </Link>
-            </h3>
-            <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-2">
-              <MapPin className="h-4 w-4 mr-1" />
-              {school.PPD}, {school.NEGERI}
-            </div>
+    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg shadow-sm">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+        {schools[0].PUSAT}
+      </h3>
+      <div className="h-px bg-gray-300 dark:bg-gray-700 my-2 w-full" />
+      
+      <div className="space-y-8 mt-4">
+        {Object.entries(groupedSubjects).map(([semester, bidangGroups]) => (
+          <div key={semester} className="space-y-6">
+            {Object.entries(bidangGroups).map(([bidang, { combinations }]) => (
+              <div key={`${semester}-${bidang}`}>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-3">
+                  {semester} - {bidang}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {combinations.map((subjects, idx) => (
+                    <div key={idx} className="bg-white dark:bg-gray-800 rounded-md p-4 shadow-sm">
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        Class {idx + 1}
+                      </div>
+                      <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                        {subjects.map((subject, subjectIdx) => (
+                          <li key={subjectIdx} className="flex items-start">
+                            <span className="mr-2">-</span>
+                            <span>{subject}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-          <Button
-            variant={isAdded ? "outline" : "default"}
-            size="sm"
-            onClick={handleCompare}
-            disabled={isAdded}
-            className={isAdded ? "border-green-500 text-green-600 dark:border-green-400 dark:text-green-400" : ""}
-          >
-            {isAdded ? (
-              <>
-                <Check className="h-4 w-4 mr-1" />
-                Added
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-1" />
-                Compare
-              </>
-            )}
-          </Button>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-3">
-          <Badge
-            variant="secondary"
-            className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-          >
-            {school.BIDANG}
-          </Badge>
-          <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
-            {school.SEMESTER}
-          </Badge>
-        </div>
-
-        <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-2">
-          <BookOpen className="h-4 w-4 mr-1" />
-          <span className="font-medium">Subjects:</span>
-          <span className="ml-1 truncate">
-            {isExpanded
-              ? subjects.join(", ")
-              : `${subjects.slice(0, 3).join(", ")}${subjects.length > 3 ? "..." : ""}`}
-          </span>
-        </div>
-
-        {subjects.length > 3 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-blue-600 dark:text-blue-400 p-0 h-auto"
-          >
-            {isExpanded ? "Show less" : "Show all subjects"}
-          </Button>
-        )}
+        ))}
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 flex justify-between items-center">
+      {/* Card Footer */}
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
         <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
           <GraduationCap className="h-4 w-4 mr-1" />
-          {subjects.length} subjects available
+          {Object.values(groupedSubjects).reduce((total, bidangGroups) => 
+            total + Object.values(bidangGroups).reduce((sum, { combinations }) => 
+              sum + combinations.length, 0
+            ), 0
+          )} classes available
         </div>
-        <Link href={`/schools/${school.ID}`}>
-          <Button variant="link" size="sm" className="text-blue-600 dark:text-blue-400">
-            View Details
-          </Button>
-        </Link>
+        <Button
+          variant={isAdded ? "outline" : "default"}
+          size="sm"
+          onClick={handleCompare}
+          disabled={isAdded}
+          className={isAdded ? "border-green-500 text-green-600 dark:border-green-400 dark:text-green-400" : ""}
+        >
+          {isAdded ? (
+            <>
+              <Check className="h-4 w-4 mr-1" />
+              Added
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-1" />
+              Compare
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { School, fetchSchools, fetchSchoolsWithFilters, PaginatedResponse } from '@/lib/supabase'
 import { useInView } from 'react-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from "@/components/ui/button"
+import SchoolCard from '@/components/school-card'
 
 interface SchoolListProps {
   filters?: {
@@ -30,6 +29,16 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
     rootMargin: '100px',
   })
 
+  // Group schools by PUSAT (school name) with all their data
+  const groupedSchools = schools.reduce((acc, school) => {
+    const schoolName = school.PUSAT
+    if (!acc[schoolName]) {
+      acc[schoolName] = []
+    }
+    acc[schoolName].push(school)
+    return acc
+  }, {} as Record<string, School[]>)
+
   // Reset schools when filters change and shouldApplyFilters is true
   useEffect(() => {
     if (shouldApplyFilters) {
@@ -53,20 +62,15 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
       )
 
       if (hasFilters) {
-        // Convert filters to the format expected by the API
         const apiFilters: Partial<School> = {}
-        
-        // Handle state filters - if any states are selected, use them all
         if (filters && filters.states && filters.states.length > 0) {
-          apiFilters.NEGERI = filters.states[0] // Supabase will match exact value
+          apiFilters.NEGERI = filters.states[0]
         }
-
         response = await fetchSchoolsWithFilters(apiFilters, isFirstLoad ? 1 : page)
       } else {
         response = await fetchSchools(isFirstLoad ? 1 : page)
       }
       
-      // If we have multiple states selected, filter the results client-side
       let filteredData = response.data
       if (filters && filters.states && filters.states.length > 1) {
         filteredData = response.data.filter(school => 
@@ -109,49 +113,42 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
         <p className="text-sm text-red-500 dark:text-red-300 mt-2">
           Please check your connection and try again. If the problem persists, contact support.
         </p>
-        
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Schools</h2>
         <p className="text-sm text-muted-foreground">
-          Showing {schools.length} of {totalCount} schools
+          Showing {Object.keys(groupedSchools).length} of {totalCount} schools
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {schools.map((school) => (
-          <Card key={school.ID}>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2">{school.PUSAT}</h3>
-              <div className="text-sm space-y-1 text-muted-foreground">
-                <p>State: {school.NEGERI}</p>
-                <p>District: {school.PPD}</p>
-                <p>Semester: {school.SEMESTER}</p>
-                <p>Field: {school.BIDANG}</p>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="grid gap-6">
+        {Object.entries(groupedSchools).map(([schoolName, schoolGroup]) => (
+          <SchoolCard key={schoolName} schools={schoolGroup} />
         ))}
 
         {/* Loading skeletons */}
         {isLoading && (
           <>
-            {[...Array(6)].map((_, i) => (
-              <Card key={`skeleton-${i}`}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-4 w-1/3" />
+            {[...Array(3)].map((_, i) => (
+              <div key={`skeleton-${i}`} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="h-px bg-gray-200 dark:bg-gray-700 w-full" />
+                <div className="space-y-4">
+                  <div>
+                    <Skeleton className="h-5 w-1/4 mb-2" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </>
         )}
@@ -162,7 +159,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
 
       {/* Loading state at bottom */}
       {isLoading && (
-        <div className="text-center py-4">
+        <div className="text-center py-4 text-muted-foreground">
           Loading more schools...
         </div>
       )}
@@ -173,8 +170,6 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
           No more schools to load
         </div>
       )}
-
-      
     </div>
   )
 }
