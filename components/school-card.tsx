@@ -59,6 +59,11 @@ export default function SchoolCard({ schools }: SchoolCardProps) {
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           {schools[0].PUSAT}
         </h3>
+        <div className="mt-2">
+          <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-none">
+            {schools[0].PPD}
+          </Badge>
+        </div>
       </div>
       
       <div className="p-4">

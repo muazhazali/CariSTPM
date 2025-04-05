@@ -45,7 +45,7 @@ export default function Home() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white w-full flex justify-center px-4 py-10 md:py-14">
         <div className="container max-w-5xl flex flex-col items-center text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 tracking-tight">
-            {language === 'en' ? 'Find Your Perfect Form 6 (STPM) School' : 'Cari Sekolah Tingkatan 6 (STPM) Terbaik Anda'}
+            {language === 'en' ? 'Find Your Perfect Form 6 (STPM) School' : 'Cari Sekolah Tingkatan 6 (STPM) Terbaik'}
           </h1>
           <p className="text-md sm:text-lg md:text-xl mb-8 md:mb-10 px-2 text-blue-100 max-w-3xl">
             {language === 'en' ? 'Compare schools, explore subjects, and get personalized guidance' : 'Bandingkan sekolah, terokai subjek, dan dapatkan panduan peribadi'}
