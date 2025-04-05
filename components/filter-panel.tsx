@@ -91,6 +91,52 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
     setTempStates([])
     setTempSubjects([])
     setTempStreams([])
+    // Also reset the main state for desktop view
+    setSelectedStates([])
+    setSelectedSubjects([])
+    setSelectedStreams([])
+    onFilterChange({
+      states: [],
+      subjects: [],
+      streams: [],
+    })
+    onApplyFilters()
+  }
+
+  const handleDesktopStateChange = (state: string) => {
+    const newStates = selectedStates.includes(state)
+      ? selectedStates.filter((s) => s !== state)
+      : [...selectedStates, state]
+    setSelectedStates(newStates)
+    onFilterChange({
+      states: newStates,
+      subjects: selectedSubjects,
+      streams: selectedStreams,
+    })
+  }
+
+  const handleDesktopSubjectChange = (subject: string) => {
+    const newSubjects = selectedSubjects.includes(subject)
+      ? selectedSubjects.filter((s) => s !== subject)
+      : [...selectedSubjects, subject]
+    setSelectedSubjects(newSubjects)
+    onFilterChange({
+      states: selectedStates,
+      subjects: newSubjects,
+      streams: selectedStreams,
+    })
+  }
+
+  const handleDesktopStreamChange = (stream: string) => {
+    const newStreams = selectedStreams.includes(stream)
+      ? selectedStreams.filter((s) => s !== stream)
+      : [...selectedStreams, stream]
+    setSelectedStreams(newStreams)
+    onFilterChange({
+      states: selectedStates,
+      subjects: selectedSubjects,
+      streams: newStreams,
+    })
   }
 
   const handleSheetOpen = (open: boolean) => {
@@ -148,7 +194,7 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
             >
               {state}
               <button
-                onClick={() => handleStateChange(state)}
+                onClick={() => handleDesktopStateChange(state)}
                 className="ml-1 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
               >
                 <X className="h-3 w-3" />
@@ -162,7 +208,7 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
             >
               {subject}
               <button
-                onClick={() => handleSubjectChange(subject)}
+                onClick={() => handleDesktopSubjectChange(subject)}
                 className="ml-1 text-green-600 dark:text-green-300 hover:text-green-800 dark:hover:text-green-100"
               >
                 <X className="h-3 w-3" />
@@ -176,7 +222,7 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
             >
               {stream}
               <button
-                onClick={() => handleStreamChange(stream)}
+                onClick={() => handleDesktopStreamChange(stream)}
                 className="ml-1 text-purple-600 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-100"
               >
                 <X className="h-3 w-3" />
@@ -193,15 +239,11 @@ export default function FilterPanel({ onFilterChange, onApplyFilters }: FilterPa
         selectedStates={selectedStates}
         selectedSubjects={selectedSubjects}
         selectedStreams={selectedStreams}
-        onStateChange={handleStateChange}
-        onSubjectChange={handleSubjectChange}
-        onStreamChange={handleStreamChange}
+        onStateChange={handleDesktopStateChange}
+        onSubjectChange={handleDesktopSubjectChange}
+        onStreamChange={handleDesktopStreamChange}
         language={language}
       />
-
-      <Button className="w-full mt-4" variant="default" onClick={onApplyFilters}>
-        {language === 'en' ? 'Apply Filters' : 'Terapkan Penapis'}
-      </Button>
     </div>
   )
 

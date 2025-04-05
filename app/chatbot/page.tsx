@@ -2,10 +2,18 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Send, Bot, User, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 interface Message {
   id: string
@@ -15,6 +23,7 @@ interface Message {
 
 export default function ChatbotPage() {
   const router = useRouter()
+  const [showWIPDialog, setShowWIPDialog] = useState(true)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -93,6 +102,21 @@ export default function ChatbotPage() {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 mt-16">
+      <Dialog open={showWIPDialog} onOpenChange={setShowWIPDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Work in Progress</DialogTitle>
+            <DialogDescription>
+              The chatbot feature is currently under development. This is a prototype version with limited functionality.
+              We're working on integrating advanced AI capabilities to provide more accurate and comprehensive responses.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowWIPDialog(false)}>Got it, thanks!</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center mb-6">
         <Button variant="ghost" onClick={() => router.push("/")} className="mr-2">
           <ArrowLeft className="h-4 w-4 mr-1" />

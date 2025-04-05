@@ -7,11 +7,37 @@ import { Button } from "@/components/ui/button"
 import { useComparison } from "@/context/comparison-context"
 import Link from "next/link"
 import { Tooltip } from "@/components/ui/tooltip"
+import { useLanguage } from "@/context/language-context"
+
+const translations = {
+  en: {
+    compareSchools: "Compare Schools",
+    noSchoolsSelected: "No Schools Selected",
+    noSchoolsMessage: "You haven't selected any schools to compare yet. Browse schools and add them to your comparison list.",
+    browseSchools: "Browse Schools",
+    back: "Back",
+    comparison: "Comparison",
+    location: "Location",
+    subjectsOffered: "Subjects Offered"
+  },
+  ms: {
+    compareSchools: "Bandingkan Sekolah",
+    noSchoolsSelected: "Tiada Sekolah Dipilih",
+    noSchoolsMessage: "Anda belum memilih sekolah untuk dibandingkan. Layari sekolah dan tambahkan ke senarai perbandingan anda.",
+    browseSchools: "Layari Sekolah",
+    back: "Kembali",
+    comparison: "Perbandingan",
+    location: "Lokasi",
+    subjectsOffered: "Mata Pelajaran Ditawarkan"
+  }
+}
 
 export default function ComparePage() {
   const router = useRouter()
   const { schools, removeFromComparison } = useComparison()
   const [mounted, setMounted] = useState(false)
+  const { language } = useLanguage()
+  const t = translations[language]
 
   useEffect(() => {
     setMounted(true)
@@ -23,22 +49,22 @@ export default function ComparePage() {
 
   if (schools.length === 0) {
     return (
-      <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8 mt-24">
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => router.push("/")} className="mr-2">
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+            {t.back}
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Compare Schools</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t.compareSchools}</h1>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">No Schools Selected</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t.noSchoolsSelected}</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You haven't selected any schools to compare yet. Browse schools and add them to your comparison list.
+            {t.noSchoolsMessage}
           </p>
           <Link href="/">
-            <Button>Browse Schools</Button>
+            <Button>{t.browseSchools}</Button>
           </Link>
         </div>
       </div>
@@ -49,13 +75,13 @@ export default function ComparePage() {
   const allSubjects = Array.from(new Set(schools.flatMap((school) => school.PAKEJ_MATA_PELAJARAN.split(", ") || []))).sort()
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8 mt-24">
       <div className="flex items-center mb-6">
         <Button variant="ghost" onClick={() => router.push("/")} className="mr-2">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Back
+          {t.back}
         </Button>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Compare Schools</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t.compareSchools}</h1>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -64,7 +90,7 @@ export default function ComparePage() {
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-700">
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600 sticky left-0 bg-gray-50 dark:bg-gray-700">
-                  Comparison
+                  {t.comparison}
                 </th>
                 {schools.map((school) => (
                   <th
@@ -88,7 +114,7 @@ export default function ComparePage() {
               {/* Basic Information */}
               <tr>
                 <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800">
-                  Location
+                  {t.location}
                 </td>
                 {schools.map((school) => (
                   <td key={`${school.ID}-location`} className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
@@ -103,7 +129,7 @@ export default function ComparePage() {
                   colSpan={schools.length + 1}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                 >
-                  Subjects Offered
+                  {t.subjectsOffered}
                 </td>
               </tr>
 
