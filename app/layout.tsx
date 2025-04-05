@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
@@ -37,6 +38,7 @@ export default function RootLayout({
               </LanguageProvider>
             </ComparisonProvider>
           </ThemeProvider>
+          <Analytics />
         </Providers>
       </body>
     </html>
