@@ -168,6 +168,16 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <a
+                  href="https://github.com/muazhazali/CariSTPM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  CariSTPM (GitHub)
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://sedekahje.com/"
                   target="_blank"
                   rel="noopener noreferrer"
