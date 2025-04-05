@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react'
-import { School, fetchSchools, fetchSchoolsWithFilters, PaginatedResponse } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
+import { School, fetchSchools, fetchSchoolsWithFilters, searchSchools, CursorPaginatedResponse } from '@/lib/supabase'
 import { useInView } from 'react-intersection-observer'
 import { Skeleton } from '@/components/ui/skeleton'
 import SchoolCard from '@/components/school-card'
 import { useLanguage } from '@/context/language-context'
+import { useQuery } from '@tanstack/react-query'
 
 interface SchoolListProps {
   filters?: {
@@ -14,21 +15,37 @@ interface SchoolListProps {
     streams: string[]
   }
   shouldApplyFilters?: boolean
+  searchQuery?: string
 }
 
-export default function SchoolList({ filters, shouldApplyFilters = false }: SchoolListProps) {
+export default function SchoolList({ filters, shouldApplyFilters = false, searchQuery = '' }: SchoolListProps) {
+  const [cursor, setCursor] = useState<string | undefined>(undefined)
   const [schools, setSchools] = useState<School[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
   const { language } = useLanguage()
 
   // Create ref and inView for infinite scroll
   const { ref, inView } = useInView({
     threshold: 0,
     rootMargin: '200px',
+  })
+
+  // React Query for fetching schools
+  const { data, isLoading, error, isFetching } = useQuery<CursorPaginatedResponse<School>>({
+    queryKey: ['schools', { filters, searchQuery, cursor }],
+    queryFn: async () => {
+      if (searchQuery) {
+        return searchSchools(searchQuery, cursor)
+      } else if (filters && Object.values(filters).some(f => f.length > 0)) {
+        const apiFilters: Partial<School> = {}
+        if (filters.states && filters.states.length > 0) {
+          apiFilters.NEGERI = filters.states[0]
+        }
+        return fetchSchoolsWithFilters(apiFilters, cursor)
+      }
+      return fetchSchools(cursor)
+    },
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
   // Group schools by PUSAT (school name) with all their data
@@ -41,71 +58,29 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
     return acc
   }, {} as Record<string, School[]>)
 
-  // Reset schools when filters change and shouldApplyFilters is true
+  // Reset schools when filters or search query changes
   useEffect(() => {
-    if (shouldApplyFilters) {
-      setSchools([])
-      setPage(1)
-      setHasMore(true)
-      loadMoreSchools(true)
-    }
-  }, [filters, shouldApplyFilters])
+    setSchools([])
+    setCursor(undefined)
+  }, [filters, searchQuery, shouldApplyFilters])
 
-  // Function to load more schools
-  const loadMoreSchools = useCallback(async (isFirstLoad: boolean = false) => {
-    try {
-      setIsLoading(true)
-      let response: PaginatedResponse<School>
-
-      const hasFilters = filters && (
-        (filters.states && filters.states.length > 0) ||
-        (filters.subjects && filters.subjects.length > 0) ||
-        (filters.streams && filters.streams.length > 0)
-      )
-
-      if (hasFilters) {
-        const apiFilters: Partial<School> = {}
-        if (filters && filters.states && filters.states.length > 0) {
-          apiFilters.NEGERI = filters.states[0]
-        }
-        response = await fetchSchoolsWithFilters(apiFilters, isFirstLoad ? 1 : page)
+  // Update schools when data changes
+  useEffect(() => {
+    if (data?.data) {
+      if (!cursor) {
+        setSchools(data.data)
       } else {
-        response = await fetchSchools(isFirstLoad ? 1 : page)
+        setSchools(prev => [...prev, ...data.data])
       }
-      
-      let filteredData = response.data
-      if (filters && filters.states && filters.states.length > 1) {
-        filteredData = response.data.filter(school => 
-          filters.states.includes(school.NEGERI)
-        )
-      }
-      
-      setSchools(prevSchools => isFirstLoad ? filteredData : [...prevSchools, ...filteredData])
-      setHasMore(response.hasMore)
-      setTotalCount(response.count)
-      
-      if (response.hasMore && !isFirstLoad) {
-        setPage(prev => prev + 1)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch schools')
-      console.error('Error loading schools:', err)
-    } finally {
-      setIsLoading(false)
     }
-  }, [page, filters])
+  }, [data, cursor])
 
-  // Load more schools when scrolling to bottom
+  // Load more when scrolling to bottom
   useEffect(() => {
-    if (inView && hasMore && !isLoading) {
-      loadMoreSchools()
+    if (inView && data?.hasMore && !isFetching) {
+      setCursor(data.nextCursor)
     }
-  }, [inView, hasMore, isLoading, loadMoreSchools])
-
-  // Initial load
-  useEffect(() => {
-    loadMoreSchools(true)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [inView, data?.hasMore, isFetching, data?.nextCursor])
 
   if (error) {
     return (
@@ -114,7 +89,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
           {language === 'en' ? 'Error Loading Schools' : 'Ralat Memuatkan Sekolah'}
         </h3>
         <p className="text-red-600 dark:text-red-400">
-          {error}
+          {error.message}
         </p>
         <p className="text-sm text-red-500 dark:text-red-300 mt-2">
           {language === 'en' ? 'Please check your connection and try again. If the problem persists, contact support.' : 'Sila periksa sambungan anda dan cuba lagi. Jika masalah berterusan, hubungi sokongan.'}
@@ -130,7 +105,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
           {language === 'en' ? 'Schools' : 'Sekolah'}
         </h2>
         <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-          {language === 'en' ? `Showing ${Object.keys(groupedSchools).length} of ${totalCount} schools` : `Menunjukkan ${Object.keys(groupedSchools).length} daripada ${totalCount} sekolah`}
+          {language === 'en' ? `Showing ${Object.keys(groupedSchools).length} of ${data?.count || 0} schools` : `Menunjukkan ${Object.keys(groupedSchools).length} daripada ${data?.count || 0} sekolah`}
         </p>
       </div>
 
@@ -140,7 +115,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
         ))}
 
         {/* Loading skeletons */}
-        {isLoading && (
+        {(isLoading || isFetching) && (
           <>
             {[...Array(3)].map((_, i) => (
               <div key={`skeleton-${i}`} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -171,7 +146,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
       <div ref={ref} className="h-4" />
 
       {/* Loading state at bottom */}
-      {isLoading && (
+      {(isLoading || isFetching) && (
         <div className="text-center py-4 text-blue-600 dark:text-blue-400 flex items-center justify-center">
           <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-1 animate-bounce" style={{ animationDelay: '0ms' }}></div>
           <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-1 animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -180,7 +155,7 @@ export default function SchoolList({ filters, shouldApplyFilters = false }: Scho
       )}
 
       {/* End of list message */}
-      {!hasMore && !isLoading && schools.length > 0 && (
+      {!data?.hasMore && !isLoading && !isFetching && schools.length > 0 && (
         <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm font-medium">
           {language === 'en' ? "You've reached the end of the list" : 'Anda telah mencapai penghujung senarai'}
         </div>

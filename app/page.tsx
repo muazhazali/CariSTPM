@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Search } from "lucide-react"
 import SchoolList from "@/components/school-list"
 import FilterPanel from "@/components/filter-panel"
 import ComparisonBanner from "@/components/comparison-banner"
 import { useLanguage } from '@/context/language-context'
+import { useDebounce } from '@/hooks/use-debounce'
 
 interface Filters {
   states: string[]
@@ -19,6 +20,8 @@ export default function Home() {
     subjects: [],
     streams: [],
   })
+  const [searchQuery, setSearchQuery] = useState("")
+  const debouncedSearch = useDebounce(searchQuery, 300)
   const [shouldApplyFilters, setShouldApplyFilters] = useState(false)
   const { language } = useLanguage()
 
@@ -31,6 +34,10 @@ export default function Home() {
     // Reset the flag after a short delay to allow for future filter applications
     setTimeout(() => setShouldApplyFilters(false), 100)
   }
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+  }, [])
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
@@ -51,6 +58,8 @@ export default function Home() {
             </div>
             <input
               type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
               placeholder={language === 'en' ? 'Search for schools by name...' : 'Cari sekolah mengikut nama...'}
               className="w-full pl-10 pr-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 border-0 shadow-sm"
             />
@@ -74,6 +83,7 @@ export default function Home() {
             <SchoolList 
               filters={filters}
               shouldApplyFilters={shouldApplyFilters}
+              searchQuery={debouncedSearch}
             />
           </div>
         </div>
