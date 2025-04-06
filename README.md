@@ -22,8 +22,6 @@ Each record contains:
 - Stream (Bidang)
 - Subject Package
 
-### Example Package
-
 ## ✨ Features
 
 - **School Search & Filtering**: Find schools by name, location, and available streams
