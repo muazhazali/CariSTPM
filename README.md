@@ -2,6 +2,28 @@
 
 A modern web application for finding and comparing Form 6 (STPM) schools in Malaysia. CariSTPM helps students, parents, and educators make informed decisions about their educational journey.
 
+## 📊 Data Source
+
+All school and subject package data is scraped from the official MOE Form 6 Central Information System ([SST6](https://sst6.moe.gov.my/form6/pakejt6.cfm)).
+
+### Last Data Update: April 5, 2025
+
+The scraper collects comprehensive information about:
+- Schools across all states in Malaysia
+- Available subject packages for each semester
+- Core and elective subjects for both Science and Arts streams
+
+### Data Format
+Each record contains:
+- State (Negeri)
+- District (PPD)
+- School/Center (Pusat)
+- Semester (1 or 3)
+- Stream (Bidang)
+- Subject Package
+
+### Example Package
+
 ## ✨ Features
 
 - **School Search & Filtering**: Find schools by name, location, and available streams
