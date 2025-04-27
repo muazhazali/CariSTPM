@@ -1,5 +1,7 @@
 # CariSTPM 🎓
 
+![caristpm-imgsrc](https://github.com/user-attachments/assets/8ce3ccb9-9dca-4256-9e35-44a70c842fd5)
+
 A modern web application for finding and comparing Form 6 (STPM) schools in Malaysia. CariSTPM helps students, parents, and educators make informed decisions about their educational journey.
 
 ## 📊 Data Source
