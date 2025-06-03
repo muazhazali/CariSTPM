@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Send, Bot, User, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -21,6 +20,28 @@ interface Message {
   content: string
 }
 
+const generateResponse = async (message: string) => {
+  try {
+    const response = await fetch('http://localhost:8000/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get response');
+    }
+
+    const data = await response.json();
+    return data.response;
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
 export default function ChatbotPage() {
   const router = useRouter()
   const [showWIPDialog, setShowWIPDialog] = useState(true)
@@ -28,31 +49,14 @@ export default function ChatbotPage() {
     {
       id: "1",
       role: "assistant",
-      content:
-        "Hello! I'm your STPM entry requirements assistant. How can I help you today? You can ask me about eligibility criteria, subject requirements, or any other questions about Form 6 admissions.",
+      content: "Hello! I'm your STPM entry requirements assistant. How can I help you today? You can ask me about eligibility criteria, subject requirements, or any other questions about Form 6 admissions.",
     },
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Sample responses - in a real app, this would be replaced with actual AI processing
-  const sampleResponses = {
-    requirements:
-      "To be eligible for Form 6, you need to have completed SPM with at least 5 credits, including Bahasa Melayu and at least a pass in History. For Science stream, you typically need credits in relevant science subjects and Mathematics.",
-    science:
-      "For Science stream in Form 6, you generally need credits in at least two of the following subjects: Physics, Chemistry, Biology, or Additional Mathematics in your SPM.",
-    social:
-      "For Social Science/Arts stream in Form 6, you need credits in relevant subjects like History, Geography, Economics, or other humanities subjects in your SPM.",
-    apply:
-      "Applications for Form 6 typically open after SPM results are released. You can apply through the official Ministry of Education portal or directly at your preferred school.",
-    deadline:
-      "The application deadline for Form 6 usually falls within 1-2 weeks after SPM results are announced. It's best to check the official Ministry of Education website for the exact dates.",
-    subjects:
-      "Form 6 offers various subjects across different streams. Science stream includes subjects like Physics, Chemistry, Biology, and Mathematics. Social Science stream includes subjects like Economics, Business Studies, Accounting, and Literature.",
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
 
@@ -66,38 +70,27 @@ export default function ChatbotPage() {
     setInput("")
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      let responseContent =
-        "I'm not sure about that. Could you please ask something about Form 6 entry requirements or subjects?"
-
-      // Check for keywords in the user's message
-      const lowerInput = input.toLowerCase()
-      if (lowerInput.includes("requirement") || lowerInput.includes("eligible") || lowerInput.includes("criteria")) {
-        responseContent = sampleResponses.requirements
-      } else if (lowerInput.includes("science") && (lowerInput.includes("stream") || lowerInput.includes("subject"))) {
-        responseContent = sampleResponses.science
-      } else if (
-        (lowerInput.includes("social") || lowerInput.includes("art")) &&
-        (lowerInput.includes("stream") || lowerInput.includes("subject"))
-      ) {
-        responseContent = sampleResponses.social
-      } else if (lowerInput.includes("apply") || lowerInput.includes("application")) {
-        responseContent = sampleResponses.apply
-      } else if (lowerInput.includes("deadline")) {
-        responseContent = sampleResponses.deadline
-      } else if (lowerInput.includes("subject") || lowerInput.includes("course")) {
-        responseContent = sampleResponses.subjects
-      }
-
+    try {
+      // Get AI response
+      const responseContent = await generateResponse(input)
+      
       const botMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
         content: responseContent,
       }
       setMessages((prev) => [...prev, botMessage])
+    } catch (error) {
+      console.error('Error getting response:', error)
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "I apologize, but I'm having trouble responding right now. Please try again later.",
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   return (
